@@ -2,397 +2,469 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HR 业务预约系统</title>
     <style>
         :root {
-            --primary: #4F6EF7;
-            --primary-dark: #3A54DB;
-            --bg: #F5F7FA;
+            --primary: #2B7DE9;
+            --primary-light: #EBF2FF;
+            --bg: #F5F8FC;
             --card-bg: #FFFFFF;
-            --text: #2D3436;
-            --text-secondary: #636E72;
-            --text-light: #999;
-            --border: #E8ECF1;
-            --success: #00B894;
-            --danger: #E17055;
-            --shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-            --radius: 14px;
+            --text: #1A1A2E;
+            --text-secondary: #6B778C;
+            --text-light: #A0ABB8;
+            --border: #E4E9F0;
+            --required: #E74C3C;
+            --success: #27AE60;
+            --danger: #E74C3C;
+            --warning-orange: #E67E22;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 10px;
             --radius-xs: 8px;
-            --transition: all 0.2s ease;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-            background: #E8ECF1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .phone-frame {
-            width: 390px;
-            height: 844px;
             background: var(--bg);
-            border-radius: 36px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 0 0 3px #1a1a1a, 0 0 0 6px #2d2d2d;
-            position: relative;
-            display: flex;
-            flex-direction: column;
+            color: var(--text);
+            min-height: 100vh;
+            min-height: 100dvh;
         }
 
-        .status-bar {
-            background: #FFFFFF;
-            padding: 14px 28px 8px;
+        /* ===== 登录层 ===== */
+        .login-view {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(160deg, #2B7DE9 0%, #1E57A8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 24px;
+        }
+        .login-view.hidden { display: none; }
+        .login-card {
+            background: #fff;
+            width: 100%;
+            max-width: 340px;
+            border-radius: var(--radius-lg);
+            padding: 36px 28px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.22);
+            text-align: center;
+        }
+        .login-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+        .login-card .sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; }
+        .login-input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            outline: none;
+            font-family: inherit;
+            transition: border-color .2s;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+        .login-input:focus { border-color: var(--primary); }
+        .login-hint {
+            font-size: 12.5px;
+            color: var(--danger);
+            min-height: 18px;
+            margin-bottom: 6px;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 4px;
+        }
+        .btn-login:active { opacity: .88; }
+        .login-tip { font-size: 11.5px; color: #B0BCC8; margin-top: 16px; line-height: 1.6; }
+
+        /* ===== 主应用容器 ===== */
+        #app {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        /* ===== 顶部导航栏 ===== */
+        .top-header {
+            background: #fff;
+            padding: 18px 20px 14px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .top-header h1 {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== 已登录状态条 ===== */
+        .logged-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12px;
+            padding: 8px 20px;
+            background: var(--primary-light);
+            font-size: 12.5px;
             font-weight: 600;
-            color: #1a1a1a;
+            color: var(--primary);
             flex-shrink: 0;
         }
-        .status-bar .time {
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .notch-bar {
-            display: flex;
-            justify-content: center;
-            padding: 0 0 4px;
-            background: #FFFFFF;
-            flex-shrink: 0;
-        }
-        .notch {
-            width: 100px;
-            height: 28px;
-            background: #1a1a1a;
-            border-radius: 20px;
-        }
-
-        .nav-header {
-            background: #FFFFFF;
-            padding: 12px 20px 14px;
-            text-align: center;
-            font-size: 17px;
-            font-weight: 700;
-            color: var(--text);
-            flex-shrink: 0;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .scroll-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px 16px 20px;
-            -webkit-overflow-scrolling: touch;
-        }
-        .scroll-content::-webkit-scrollbar {
-            width: 0;
-        }
-
-        .tab-switch {
-            display: flex;
-            background: #EEF1F6;
-            border-radius: 22px;
-            padding: 4px;
-            margin: 0 16px 18px;
-            flex-shrink: 0;
-        }
-        .tab-switch .tab-item {
-            flex: 1;
-            text-align: center;
-            padding: 10px 16px;
-            border-radius: 19px;
-            font-size: 14px;
+        .logged-bar .logout-btn {
+            color: var(--danger);
             font-weight: 600;
             cursor: pointer;
-            transition: var(--transition);
-            color: var(--text-secondary);
-        }
-        .tab-switch .tab-item.active {
-            background: #FFFFFF;
-            color: var(--primary);
-            box-shadow: 0 2px 8px rgba(79, 110, 247, 0.15);
+            padding: 2px 8px;
+            border-radius: 4px;
         }
 
-        .card {
+        /* ===== 胶囊 Tab 切换 ===== */
+        .tab-switch {
+            display: flex;
+            gap: 0;
+            padding: 12px 20px 0;
+            flex-shrink: 0;
+        }
+        .tab-pill {
+            flex: 1;
+            text-align: center;
+            padding: 11px 0;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+            color: var(--text-secondary);
+            background: transparent;
+            position: relative;
+            transition: color .2s;
+        }
+        .tab-pill.active {
+            color: var(--primary);
+            background: #fff;
+            box-shadow: 0 -2px 10px rgba(43,125,233,.08);
+        }
+
+        /* ===== 内容区 ===== */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 20px 30px;
+            background: var(--bg);
+        }
+        .main-content::-webkit-scrollbar { display: none; }
+
+        /* ===== 表单卡片 ===== */
+        .form-card {
             background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 20px 18px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow);
+            border-radius: var(--radius-lg);
+            padding: 24px 20px 20px;
+            margin-top: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,.03);
         }
-        .card-header {
-            margin-bottom: 18px;
-            padding-bottom: 14px;
-            border-bottom: 1px solid var(--border);
-        }
-        .card-header h3 {
+        .form-card-title {
             font-size: 16px;
             font-weight: 700;
             color: var(--text);
-            margin: 0 0 4px;
+            margin-bottom: 4px;
         }
-        .card-header p {
-            font-size: 12px;
+        .form-card-sub {
+            font-size: 12.5px;
             color: var(--text-secondary);
-            margin: 0;
+            margin-bottom: 22px;
         }
-
         .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 18px;
         }
         .form-label {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             color: var(--text);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            display: block;
         }
-        .form-label .required {
-            color: var(--danger);
-            font-weight: 700;
+        .form-label .req {
+            color: var(--required);
+            margin-left: 2px;
         }
-        .form-input,
-        .form-picker {
+        .form-field {
             width: 100%;
-            padding: 13px 15px;
-            border: 2px solid var(--border);
-            border-radius: var(--radius-xs);
+            height: 48px;
+            padding: 0 16px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
             font-size: 15px;
             color: var(--text);
-            background: #FAFBFC;
-            transition: var(--transition);
-            cursor: pointer;
+            background: #FAFBFD;
             outline: none;
             font-family: inherit;
+            transition: all .2s;
+            appearance: none;
+            -webkit-appearance: none;
         }
-        .form-input:focus {
+        .form-field:focus {
             border-color: var(--primary);
-            background: #FFF;
-            box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.06);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(43,125,233,.08);
         }
-        .form-picker {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-right: 12px;
+        .form-field:disabled {
+            background: #F0F2F5;
+            color: #888;
         }
-        .form-picker .placeholder {
-            color: #B0B8C1;
+        .form-picker-wrap {
+            position: relative;
         }
-        .form-picker .arrow {
-            font-size: 12px;
-            color: #B0B8C1;
-        }
-        .form-row {
-            display: flex;
-            gap: 10px;
-        }
-        .form-row .form-group {
-            flex: 1;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 14px 28px;
-            border-radius: 22px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            border: none;
-            transition: var(--transition);
-            width: 100%;
-            text-align: center;
-            font-family: inherit;
-        }
-        .btn-primary {
-            background: var(--primary);
-            color: #FFF;
-            box-shadow: 0 6px 18px rgba(79, 110, 247, 0.25);
-        }
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
-        .btn-outline {
-            background: #FFF;
-            color: var(--primary);
-            border: 2px solid var(--primary);
-            font-weight: 600;
-        }
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 12px;
-            border-radius: 16px;
-            width: auto;
-            font-weight: 600;
-        }
-        .btn-disabled {
-            background: #D5DAE0;
-            color: #FFF;
-            cursor: not-allowed;
+        .form-picker-wrap::after {
+            content: '';
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 5px solid transparent;
+            border-top-color: #B0BCC8;
             pointer-events: none;
         }
-
-        .record-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow);
-            border-left: 4px solid var(--primary);
+        .form-picker-wrap .form-field {
+            cursor: pointer;
+            padding-right: 36px;
+            color: #B0BCC8;
         }
-        .record-card.status-confirmed {
-            border-left-color: var(--success);
-        }
-        .record-card.status-rejected {
-            border-left-color: var(--danger);
-        }
-        .record-card .record-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-        }
-        .record-card .record-type {
-            font-weight: 700;
-            font-size: 15px;
+        .form-picker-wrap .form-field.has-value {
             color: var(--text);
         }
-        .record-card .record-status {
-            font-size: 11px;
+
+        /* ===== 提交按钮 ===== */
+        .submit-area {
+            padding: 24px 20px 10px;
+        }
+        .btn-submit {
+            width: 100%;
+            height: 50px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .2s;
+        }
+        .btn-submit.active {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(43,125,233,.32);
+        }
+        .btn-submit.active:active { opacity: .88; transform: scale(.99); }
+        .btn-submit.disabled {
+            background: #D0DAE8;
+            color: #fff;
+            cursor: not-allowed;
+        }
+        .submit-note {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 10px;
+        }
+
+        /* ===== 记录卡片 ===== */
+        .record-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 18px 18px 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.03);
+            border-left: 4px solid var(--primary);
+        }
+        .record-card.status-confirmed { border-left-color: var(--success); }
+        .record-card.status-rejected { border-left-color: var(--danger); }
+        .record-card.status-cancelled { border-left-color: var(--text-light); }
+        .rc-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .rc-type { font-weight: 700; font-size: 15px; }
+        .rc-status {
+            font-size: 11.5px;
             font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 12px;
+            padding: 3px 10px;
+            border-radius: 10px;
         }
-        .status-pending {
-            background: #FFF8E7;
-            color: #C79100;
-        }
-        .status-confirmed {
-            background: #E6FAF3;
-            color: #00875A;
-        }
-        .status-rejected-tag {
-            background: #FFEEEA;
-            color: #D63031;
-        }
-        .record-card .record-detail {
+        .st-pending { background: #FFF9ED; color: #D4940A; }
+        .st-confirmed { background: #EDFBF4; color: #1D8A52; }
+        .st-rejected { background: #FEECEC; color: #D63C31; }
+        .st-cancelled { background: #F5F5F5; color: #999; }
+        .rc-detail {
             font-size: 13px;
             color: var(--text-secondary);
-            line-height: 1.6;
+            line-height: 1.7;
         }
-        .record-card .record-detail span {
-            display: inline-block;
-            margin-right: 14px;
-        }
-        .record-card .record-time {
-            font-size: 11px;
+        .rc-detail span { display: inline-block; margin-right: 14px; }
+        .rc-time {
+            font-size: 11.5px;
             color: var(--text-light);
             margin-top: 8px;
         }
-
-        .toast {
-            position: absolute;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2D3436;
-            color: #FFF;
-            padding: 12px 24px;
-            border-radius: 20px;
-            font-size: 14px;
+        .rc-action {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+        .btn-sm-action {
+            padding: 8px 18px;
+            border-radius: var(--radius-xs);
+            font-size: 12.5px;
             font-weight: 600;
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            white-space: nowrap;
+            border: 1.5px solid var(--border);
+            background: #fff;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-family: inherit;
         }
-        .toast.show {
-            opacity: 1;
-        }
-        .toast.success {
-            background: var(--success);
-        }
-        .toast.error {
-            background: var(--danger);
+        .btn-sm-danger {
+            border-color: #FDD8DC;
+            color: var(--danger);
+            background: #FEF5F6;
         }
 
+        /* ===== 空状态 ===== */
         .empty-state {
             text-align: center;
-            padding: 50px 20px;
+            padding: 60px 20px;
             color: var(--text-light);
-            font-size: 14px;
+            font-size: 14.5px;
         }
 
+        /* ===== 温馨提示弹窗 ===== */
         .modal-overlay {
-            position: absolute;
+            position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 50;
+            background: rgba(0,0,0,.45);
+            z-index: 300;
             display: flex;
             align-items: flex-end;
             justify-content: center;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
+            transition: opacity .25s ease;
         }
-        .modal-overlay.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
         .modal-sheet {
-            background: #FFF;
-            border-radius: 18px 18px 0 0;
-            padding: 24px 20px 30px;
+            background: #fff;
+            border-radius: 20px 20px 0 0;
+            padding: 28px 24px 34px;
             width: 100%;
-            max-height: 60%;
+            max-width: 500px;
+            max-height: 85vh;
             overflow-y: auto;
             transform: translateY(100%);
-            transition: transform 0.3s ease;
+            transition: transform .3s cubic-bezier(.32,.72,0,1);
         }
-        .modal-overlay.show .modal-sheet {
-            transform: translateY(0);
+        .modal-overlay.show .modal-sheet { transform: translateY(0); }
+        .tip-title {
+            text-align: center;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 18px;
         }
-        .modal-sheet h4 {
+        .tip-body {
+            font-size: 14px;
+            line-height: 1.75;
+            color: var(--text-secondary);
+            margin-bottom: 18px;
+        }
+        .tip-warn-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--warning-orange);
+            margin-bottom: 8px;
+        }
+        .tip-rules {
+            font-size: 13.5px;
+            line-height: 1.85;
+            color: var(--text-secondary);
+            padding-left: 2px;
+            margin-bottom: 16px;
+        }
+        .tip-thanks { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; }
+        .btn-tip-close {
+            width: 100%;
+            height: 48px;
+            border-radius: 24px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn-tip-close:active { opacity: .88; }
+
+        /* ===== 选择器弹窗（底部抽屉） ===== */
+        .picker-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.35);
+            z-index: 250;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s ease;
+        }
+        .picker-overlay.show { opacity: 1; pointer-events: auto; }
+        .picker-sheet {
+            background: #fff;
+            border-radius: 18px 18px 0 0;
+            padding: 22px 20px 26px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 60vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform .3s cubic-bezier(.32,.72,0,1);
+        }
+        .picker-overlay.show .picker-sheet { transform: translateY(0); }
+        .picker-sheet h4 {
             text-align: center;
             font-size: 16px;
-            margin-bottom: 16px;
             font-weight: 700;
+            margin-bottom: 16px;
         }
-        .modal-sheet .option-item {
+        .picker-opt {
             padding: 13px 16px;
-            border-radius: var(--radius-xs);
+            border-radius: var(--radius-sm);
             cursor: pointer;
             font-size: 15px;
             text-align: center;
             margin-bottom: 6px;
             color: var(--text);
             font-weight: 500;
-            transition: var(--transition);
+            transition: background .15s;
         }
-        .modal-sheet .option-item:hover {
-            background: #F5F7FA;
-        }
-        .modal-sheet .option-item.selected {
-            background: #EEF2FF;
-            color: var(--primary);
-            font-weight: 700;
-        }
-        .modal-cancel {
+        .picker-opt:hover, .picker-opt:active { background: var(--bg); }
+        .picker-opt.selected { background: var(--primary-light); color: var(--primary); font-weight: 700; }
+        .picker-cancel-btn {
             display: block;
             width: 100%;
             padding: 13px;
@@ -400,181 +472,171 @@
             font-weight: 600;
             color: var(--text-secondary);
             cursor: pointer;
-            border-radius: 20px;
+            border-radius: var(--radius-sm);
             margin-top: 8px;
-            background: #F5F7FA;
+            background: var(--bg);
             border: none;
             font-size: 15px;
             font-family: inherit;
         }
 
-        @media (max-width: 440px) {
-            .phone-frame {
-                width: 100%;
-                height: 100vh;
-                border-radius: 0;
-                box-shadow: none;
-            }
-            body {
-                padding: 0;
-            }
-        }
-
-        /* ===== 登录层 ===== */
-        .login-view {
+        /* ===== Toast ===== */
+        .toast {
             position: fixed;
-            inset: 0;
-            background: linear-gradient(135deg, #4F6EF7 0%, #3A54DB 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-            padding: 20px;
-        }
-        .login-view.hidden { display: none; }
-        .login-card {
-            background: #fff;
-            width: 100%;
-            max-width: 340px;
-            border-radius: 20px;
-            padding: 32px 26px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-            text-align: center;
-        }
-        .login-card h2 { font-size: 20px; color: var(--text); margin: 0 0 6px; }
-        .login-card .sub { font-size: 13px; color: var(--text-secondary); margin: 0 0 22px; }
-        .login-card .form-input { margin-bottom: 14px; text-align: center; }
-        .login-card .btn { margin-top: 6px; }
-        .login-hint {
-            font-size: 12.5px;
-            color: var(--danger);
-            min-height: 18px;
-            margin: 4px 0 10px;
-        }
-        .login-tip { font-size: 11.5px; color: #B0B8C1; margin-top: 14px; line-height: 1.5; }
-        .logged-bar {
-            background: #EEF2FF;
-            color: var(--primary);
-            font-size: 12px;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            background: rgba(26,26,46,.88);
+            color: #fff;
+            padding: 11px 24px;
+            border-radius: 24px;
+            font-size: 14px;
             font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 16px;
-            flex-shrink: 0;
+            z-index: 400;
+            opacity: 0;
+            pointer-events: none;
+            transition: all .25s ease;
+            white-space: nowrap;
+            backdrop-filter: blur(8px);
         }
-        .logged-bar .logout { color: var(--danger); cursor: pointer; font-weight: 600; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: rgba(39,174,96,.92); }
+        .toast.error { background: rgba(231,76,60,.92); }
     </style>
 </head>
 <body>
 
-    <!-- 登录层（未登录时显示） -->
+    <!-- ===== 登录层 ===== -->
     <div class="login-view" id="loginView">
         <div class="login-card">
             <h2>HR 业务预约系统</h2>
             <p class="sub">请使用 OA 账号登录</p>
-            <input type="text" class="form-input" id="loginOA" placeholder="OA账号" maxlength="40" autocomplete="username">
-            <input type="password" class="form-input" id="loginPwd" placeholder="密码（至少6位）" autocomplete="current-password">
+            <input type="text" class="login-input" id="loginOA" placeholder="OA账号" maxlength="40" autocomplete="username">
+            <input type="password" class="login-input" id="loginPwd" placeholder="密码（至少6位）" autocomplete="current-password">
             <div class="login-hint" id="loginHint"></div>
-            <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">登录 / 注册</button>
+            <button class="btn-login" id="loginBtn" onclick="handleLogin()">登录 / 注册</button>
             <p class="login-tip">首次使用将自动为您创建账号并设置密码；<br>登录后只能看到您本人的预约记录。</p>
         </div>
     </div>
 
-    <div class="phone-frame" id="app" style="display:none;">
-        <div class="status-bar">
-            <span class="time">9:41</span>
-            <span>5G ▮▮▮▮ 🔋</span>
+    <!-- ===== 主应用 ===== -->
+    <div id="app">
+
+        <!-- 顶部标题 -->
+        <div class="top-header">
+            <h1>HR业务预约</h1>
         </div>
-        <div class="notch-bar"><div class="notch"></div></div>
-        <div class="nav-header">HR 业务预约系统</div>
-        <div class="logged-bar">
+
+        <!-- 已登录状态条 -->
+        <div class="logged-bar" id="loggedBar" style="display:none;">
             <span id="loggedOA">已登录</span>
-            <span class="logout" onclick="handleLogout()">退出</span>
+            <span class="logout-btn" onclick="handleLogout()">退出</span>
         </div>
 
-        <div class="tab-switch" id="tabSwitch">
-            <div class="tab-item active" data-tab="form" onclick="switchTab('form')">预约申请</div>
-            <div class="tab-item" data-tab="records" onclick="switchTab('records')">预约记录</div>
+        <!-- Tab 切换 -->
+        <div class="tab-switch" id="tabSwitch" style="display:none;">
+            <div class="tab-pill active" data-tab="form" onclick="switchTab('form')">新建预约</div>
+            <div class="tab-pill" data-tab="records" onclick="switchTab('records')">预约记录</div>
         </div>
 
+        <!-- Toast -->
         <div class="toast" id="toast"></div>
 
-        <div class="scroll-content" id="scrollContent">
-            <!-- 表单 -->
+        <!-- 内容区 -->
+        <div class="main-content">
+
+            <!-- === 新建预约 === -->
             <div id="formView">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>新建预约</h3>
-                        <p>请填写以下信息完成预约</p>
-                    </div>
+                <div class="form-card">
+                    <div class="form-card-title">新建预约</div>
+                    <div class="form-card-sub">请填写以下信息完成预约</div>
+
                     <div class="form-group">
-                        <label class="form-label">申请人OA账号 <span class="required">*</span></label>
-                        <input type="text" class="form-input" id="oaAccount" placeholder="请输入您的OA账号" maxlength="30" oninput="validateForm()">
+                        <label class="form-label">申请人OA账号 <span class="req">*</span></label>
+                        <input type="text" class="form-field" id="oaAccount" placeholder="" maxlength="30" oninput="validateForm()">
                     </div>
+
                     <div class="form-group">
-                        <label class="form-label">预约业务类型 <span class="required">*</span></label>
-                        <div class="form-picker" id="bizTypePicker" onclick="openPicker('bizType')">
-                            <span class="placeholder" id="bizTypeText">请选择业务类型</span>
-                            <span class="arrow">▾</span>
+                        <label class="form-label">预约业务类型 <span class="req">*</span></label>
+                        <div class="form-picker-wrap" onclick="openPicker('bizType')">
+                            <input type="text" class="form-field" id="bizTypeText" readonly placeholder="请选择业务类型" onclick="openPicker('bizType')">
                         </div>
                     </div>
+
                     <div class="form-group">
-                        <label class="form-label">预约地点 <span class="required">*</span></label>
-                        <div class="form-picker" id="locationPicker" onclick="openPicker('location')">
-                            <span class="placeholder" id="locationText">请选择预约地点</span>
-                            <span class="arrow">▾</span>
+                        <label class="form-label">预约地点 <span class="req">*</span></label>
+                        <div class="form-picker-wrap" onclick="openPicker('location')">
+                            <input type="text" class="form-field" id="locationText" readonly placeholder="请选择预约地点" onclick="openPicker('location')">
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">预约日期 <span class="required">*</span></label>
-                            <div class="form-picker" id="datePicker" onclick="openDatePicker()">
-                                <span class="placeholder" id="dateText">请选择日期</span>
-                                <span class="arrow">▾</span>
-                            </div>
+
+                    <div class="form-group">
+                        <label class="form-label">预约日期 <span class="req">*</span></label>
+                        <div class="form-picker-wrap" onclick="openDatePicker()">
+                            <input type="text" class="form-field" id="dateText" readonly placeholder="请选择日期" onclick="openDatePicker()">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">预约时间 <span class="required">*</span></label>
-                            <div class="form-picker" id="timePicker" onclick="openTimePicker()">
-                                <span class="placeholder" id="timeText">请选择时间</span>
-                                <span class="arrow">▾</span>
-                            </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">预约时间 <span class="req">*</span></label>
+                        <div class="form-picker-wrap" onclick="openTimePicker()">
+                            <input type="text" class="form-field" id="timeText" readonly placeholder="请选择时间" onclick="openTimePicker()">
                         </div>
                     </div>
                 </div>
-                <button class="btn btn-primary btn-disabled" id="submitBtn" onclick="submitForm()">确认提交预约</button>
-                <p style="text-align:center;font-size:11px;color:#B0B8C1;margin-top:10px;">提交后HR将会尽快处理</p>
+
+                <div class="submit-area">
+                    <button class="btn-submit disabled" id="submitBtn" onclick="submitForm()">请完整填写表单</button>
+                    <p class="submit-note">提交后HR将会尽快处理</p>
+                </div>
             </div>
 
-            <!-- 记录 -->
+            <!-- === 预约记录 === -->
             <div id="recordsView" style="display:none;">
                 <div id="recordsList"></div>
                 <div class="empty-state" id="emptyState">暂无预约记录</div>
             </div>
-        </div>
 
-        <!-- 弹窗 -->
-        <div class="modal-overlay" id="pickerModal">
-            <div class="modal-sheet">
-                <h4 id="pickerTitle">请选择</h4>
-                <div id="pickerOptions"></div>
-                <button class="modal-cancel" onclick="closePicker()">取消</button>
+        </div><!-- /.main-content -->
+
+    </div><!-- /#app -->
+
+    <!-- ===== 温馨提示弹窗 ===== -->
+    <div class="modal-overlay" id="tipModal">
+        <div class="modal-sheet">
+            <div class="tip-title">温馨提示</div>
+            <div class="tip-body">欢迎使用HR智能业务预约系统。您可根据自身需求，自助选择业务办理时间。</div>
+            <div class="tip-warn-label">请注意：</div>
+            <div class="tip-rules">
+                1. 单个预约申请只对应一项业务；<br>
+                2. 每日可预约总量为5人次，额满即止；<br>
+                3. 预约提交后，须经管理员审核确认，确认后方视为有效预约。
             </div>
+            <div class="tip-thanks">感谢您的理解与配合！</div>
+            <button class="btn-tip-close" onclick="closeTipModal()">我知道了</button>
         </div>
-        <div class="modal-overlay" id="dateModal">
-            <div class="modal-sheet">
-                <h4>选择预约日期</h4>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;" id="dateOptions"></div>
-                <button class="modal-cancel" onclick="closeDatePicker()">取消</button>
-            </div>
+    </div>
+
+    <!-- ===== 选择器弹窗 ===== -->
+    <div class="picker-overlay" id="pickerModal">
+        <div class="picker-sheet">
+            <h4 id="pickerTitle">请选择</h4>
+            <div id="pickerOptions"></div>
+            <button class="picker-cancel-btn" onclick="closePicker()">取消</button>
         </div>
-        <div class="modal-overlay" id="timeModal">
-            <div class="modal-sheet">
-                <h4>选择预约时间</h4>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;" id="timeOptions"></div>
-                <button class="modal-cancel" onclick="closeTimePicker()">取消</button>
-            </div>
+    </div>
+    <div class="picker-overlay" id="dateModal">
+        <div class="picker-sheet">
+            <h4>选择预约日期</h4>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;" id="dateOptions"></div>
+            <button class="picker-cancel-btn" onclick="closeDatePicker()">取消</button>
+        </div>
+    </div>
+    <div class="picker-overlay" id="timeModal">
+        <div class="picker-sheet">
+            <h4>选择预约时间</h4>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;" id="timeOptions"></div>
+            <button class="picker-cancel-btn" onclick="closeTimePicker()">取消</button>
         </div>
     </div>
 
@@ -582,8 +644,9 @@
     <script src="config.js"></script>
     <script src="db.js"></script>
     <script>
-        // ==================== 数据来源：云端 Supabase（与管理端实时共享） ====================
+        // ==================== 数据 ====================
         const LAST_OA_KEY = 'hr_last_oa';
+        const TIP_SHOWN_KEY = 'hr_tip_shown_v2';
 
         const bizTypes = [
             '入职办理', '离职办理', '社保公积金咨询', '劳动合同签订',
@@ -604,26 +667,22 @@
         let formData = { oaAccount: '', bizType: '', location: '', date: '', time: '' };
         let currentPickerType = '';
 
-        // ==================== 初始化 ====================
-        async function loadReservations() {
-            try {
-                reservations = await DB.list();
-            } catch (e) {
-                reservations = [];
-                showToast('加载失败：' + (e.message || e), 'error');
-            }
-        }
-
-        function saveReservations() {
-            // 数据由云端持久化，前端不再写入本地
-        }
-
-        // ==================== 登录 / 鉴权 ====================
+        // ==================== 工具 ====================
         function oaFromEmail(email) {
             if (!email) return '';
             return email.split('@')[0];
         }
 
+        // ==================== Toast ====================
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast' + (type ? ' ' + type : '') + ' show';
+            clearTimeout(toast._t);
+            toast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+
+        // ==================== 登录 ====================
         function showLogin() {
             document.getElementById('loginView').classList.remove('hidden');
             document.getElementById('app').style.display = 'none';
@@ -633,25 +692,31 @@
             const oa = oaFromEmail(session && session.user && session.user.email);
             document.getElementById('loginView').classList.add('hidden');
             document.getElementById('app').style.display = 'flex';
+            document.getElementById('loggedBar').style.display = 'flex';
+            document.getElementById('tabSwitch').style.display = 'flex';
             document.getElementById('loggedOA').textContent = '已登录：' + oa;
-            // 锁定 OA 账号输入（身份由登录决定，不可改）
+
+            // 锁定 OA
             const oaInput = document.getElementById('oaAccount');
             oaInput.value = oa;
             oaInput.disabled = true;
-            oaInput.style.background = '#F0F0F0';
-            oaInput.style.color = '#888';
             formData.oaAccount = oa;
             updateSubmitButton();
-            // 首次拉取云端数据（RLS 自动只返回本人的）
+
+            // 拉数据
             loadReservations().then(() => {
                 if (document.getElementById('recordsView').style.display !== 'none') renderRecords();
             });
-            // 实时监听云端变更
             DB.subscribe(() => {
                 loadReservations().then(() => {
                     if (document.getElementById('recordsView').style.display !== 'none') renderRecords();
                 });
             });
+
+            // 首次进入显示温馨提示
+            if (!localStorage.getItem(TIP_SHOWN_KEY)) {
+                setTimeout(() => { document.getElementById('tipModal').classList.add('show'); }, 400);
+            }
         }
 
         function showLoginHint(msg) {
@@ -671,13 +736,12 @@
                 const r = await DB.signIn(oa, pwd);
                 session = r.session || (r.data && r.data.session);
             } catch (e) {
-                // 登录失败 → 可能是首次使用，自动注册
                 try {
                     const r2 = await DB.signUp(oa, pwd);
-                    session = r2.session || (r2.data && r2.data.session);
+                    session = r2.session || (r2.data && r2.session);
                     if (!session) {
                         btn.textContent = '登录 / 注册';
-                        showLoginHint('账号已创建，但需验证邮箱才能登录。请到 Supabase 关闭“邮箱验证”后重试。');
+                        showLoginHint('账号已创建，但需验证邮箱才能登录。请到 Supabase 关闭"邮箱验证"后重试。');
                         return;
                     }
                 } catch (e2) {
@@ -693,10 +757,10 @@
         async function handleLogout() {
             await DB.signOut();
             document.getElementById('oaAccount').disabled = false;
-            document.getElementById('oaAccount').style.background = '';
-            document.getElementById('oaAccount').style.color = '';
             formData = { oaAccount: '', bizType: '', location: '', date: '', time: '' };
             reservations = [];
+            document.getElementById('loggedBar').style.display = 'none';
+            document.getElementById('tabSwitch').style.display = 'none';
             showLogin();
         }
 
@@ -710,30 +774,31 @@
                 showToast('未连接到云端，请在 config.js 填入 Supabase 密钥', 'error');
                 return;
             }
-            // 已有会话则直接进入，否则显示登录
             const session = await DB.getSession();
             if (session) {
                 enterApp(session);
             } else {
                 showLogin();
             }
-            // 登录态变化（如 token 刷新）同步
-            DB.onAuthChange((s) => {
-                if (!s) showLogin();
-            });
+            DB.onAuthChange((s) => { if (!s) showLogin(); });
         }
 
-        // ==================== Tab切换 ====================
+        // ==================== 温馨提示 ====================
+        function closeTipModal() {
+            document.getElementById('tipModal').classList.remove('show');
+            localStorage.setItem(TIP_SHOWN_KEY, '1');
+        }
+
+        // ==================== Tab 切换 ====================
         function switchTab(tab) {
-            document.querySelectorAll('#tabSwitch .tab-item').forEach(el => el.classList.remove('active'));
-            document.querySelector(`#tabSwitch .tab-item[data-tab="${tab}"]`).classList.add('active');
+            document.querySelectorAll('.tab-pill').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.tab-pill[data-tab="${tab}"]`).classList.add('active');
             document.getElementById('formView').style.display = tab === 'form' ? 'block' : 'none';
             document.getElementById('recordsView').style.display = tab === 'records' ? 'block' : 'none';
             if (tab === 'records') {
-                loadReservations();
-                renderRecords();
+                loadReservations().then(renderRecords);
             }
-            document.getElementById('scrollContent').scrollTop = 0;
+            document.querySelector('.main-content').scrollTop = 0;
         }
 
         // ==================== 选择器 ====================
@@ -743,7 +808,7 @@
             const currentVal = type === 'bizType' ? formData.bizType : formData.location;
             document.getElementById('pickerTitle').textContent = type === 'bizType' ? '选择业务类型' : '选择预约地点';
             document.getElementById('pickerOptions').innerHTML = options.map(opt =>
-                `<div class="option-item ${opt === currentVal ? 'selected' : ''}" onclick="selectPickerOption('${opt.replace(/'/g, "\\'")}')">${opt}</div>`
+                `<div class="picker-opt ${opt === currentVal ? 'selected' : ''}" onclick="selectPickerOption('${opt.replace(/'/g, "\\'")}')">${opt}</div>`
             ).join('');
             document.getElementById('pickerModal').classList.add('show');
         }
@@ -751,12 +816,14 @@
         function selectPickerOption(value) {
             if (currentPickerType === 'bizType') {
                 formData.bizType = value;
-                document.getElementById('bizTypeText').textContent = value;
-                document.getElementById('bizTypeText').classList.remove('placeholder');
+                const el = document.getElementById('bizTypeText');
+                el.value = value;
+                el.classList.add('has-value');
             } else {
                 formData.location = value;
-                document.getElementById('locationText').textContent = value;
-                document.getElementById('locationText').classList.remove('placeholder');
+                const el = document.getElementById('locationText');
+                el.value = value;
+                el.classList.add('has-value');
             }
             closePicker();
             updateSubmitButton();
@@ -775,8 +842,8 @@
                 const d = new Date(today);
                 d.setDate(today.getDate() + i);
                 const dateStr = formatDate(d);
-                const dayName = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][d.getDay()];
-                html += `<div class="option-item ${formData.date === dateStr ? 'selected' : ''}" onclick="selectDate('${dateStr}')" style="min-width:70px;padding:12px 10px;font-size:13px;text-align:center;">
+                const dayName = ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+                html += `<div class="picker-opt ${formData.date === dateStr ? 'selected' : ''}" onclick="selectDate('${dateStr}')" style="min-width:70px;padding:12px 10px;font-size:13px;text-align:center;">
               <div style="font-weight:700;">${dateStr.split('-').slice(1).join('/')}</div>
               <div style="font-size:11px;color:#888;">${dayName}</div>
             </div>`;
@@ -791,8 +858,9 @@
 
         function selectDate(dateStr) {
             formData.date = dateStr;
-            document.getElementById('dateText').textContent = dateStr;
-            document.getElementById('dateText').classList.remove('placeholder');
+            const el = document.getElementById('dateText');
+            el.value = dateStr;
+            el.classList.add('has-value');
             closeDatePicker();
             updateSubmitButton();
         }
@@ -810,7 +878,7 @@
                 for (let m = 0; m < 60; m += 30)
                     if (!(h === 18 && m > 0)) times.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
             document.getElementById('timeOptions').innerHTML = times.map(t =>
-                `<div class="option-item ${formData.time === t ? 'selected' : ''}" onclick="selectTime('${t}')" style="min-width:65px;padding:12px 14px;font-size:14px;text-align:center;">${t}</div>`
+                `<div class="picker-opt ${formData.time === t ? 'selected' : ''}" onclick="selectTime('${t}')" style="min-width:65px;padding:12px 14px;font-size:14px;text-align:center;">${t}</div>`
             ).join('');
         }
 
@@ -821,8 +889,9 @@
 
         function selectTime(timeStr) {
             formData.time = timeStr;
-            document.getElementById('timeText').textContent = timeStr;
-            document.getElementById('timeText').classList.remove('placeholder');
+            const el = document.getElementById('timeText');
+            el.value = timeStr;
+            el.classList.add('has-value');
             closeTimePicker();
             updateSubmitButton();
         }
@@ -837,10 +906,14 @@
 
         function updateSubmitButton() {
             const btn = document.getElementById('submitBtn');
-            const valid = formData.oaAccount && formData.bizType && formData.location && formData.date && formData
-            .time;
-            btn.classList.toggle('btn-disabled', !valid);
-            btn.textContent = valid ? '确认提交预约' : '请完整填写表单';
+            const valid = formData.oaAccount && formData.bizType && formData.location && formData.date && formData.time;
+            if (valid) {
+                btn.className = 'btn-submit active';
+                btn.textContent = '确认提交预约';
+            } else {
+                btn.className = 'btn-submit disabled';
+                btn.textContent = '请完整填写表单';
+            }
         }
 
         async function submitForm() {
@@ -852,15 +925,14 @@
                 showToast('预约时间不能早于当前时间', 'error');
                 return;
             }
-            const payload = {
-                oaAccount: formData.oaAccount,
-                bizType: formData.bizType,
-                location: formData.location,
-                date: formData.date,
-                time: formData.time
-            };
             try {
-                await DB.create(payload);
+                await DB.create({
+                    oaAccount: formData.oaAccount,
+                    bizType: formData.bizType,
+                    location: formData.location,
+                    date: formData.date,
+                    time: formData.time
+                });
                 localStorage.setItem(LAST_OA_KEY, formData.oaAccount);
                 resetForm();
                 showToast('预约提交成功', 'success');
@@ -872,18 +944,26 @@
         }
 
         function resetForm() {
-            formData = { oaAccount: '', bizType: '', location: '', date: '', time: '' };
-            document.getElementById('oaAccount').value = '';
-            ['bizTypeText', 'locationText', 'dateText', 'timeText'].forEach(id => {
+            formData = { oaAccount: formData.oaAccount, bizType: '', location: '', date: '', time: '' };
+            ['bizTypeText','locationText','dateText','timeText'].forEach(id => {
                 const el = document.getElementById(id);
-                el.textContent = id === 'bizTypeText' ? '请选择业务类型' : id === 'locationText' ? '请选择预约地点' :
-                    id === 'dateText' ? '请选择日期' : '请选择时间';
-                el.classList.add('placeholder');
+                const phMap = { bizTypeText:'请选择业务类型', locationText:'请选择预约地点', dateText:'请选择日期', timeText:'请选择时间' };
+                el.value = '';
+                el.classList.remove('has-value');
             });
             updateSubmitButton();
         }
 
-        // ==================== 记录 ====================
+        // ==================== 记录列表 ====================
+        async function loadReservations() {
+            try {
+                reservations = await DB.list();
+            } catch (e) {
+                reservations = [];
+                showToast('加载失败：' + (e.message || e), 'error');
+            }
+        }
+
         function renderRecords() {
             const container = document.getElementById('recordsList');
             const emptyState = document.getElementById('emptyState');
@@ -894,23 +974,23 @@
             }
             emptyState.style.display = 'none';
             container.innerHTML = reservations.map(r => {
-                const statusMap = {
-                    pending: { cls: '', tag: 'status-pending', text: '待确认' },
-                    confirmed: { cls: 'status-confirmed', tag: 'status-confirmed', text: '已确认' },
-                    rejected: { cls: 'status-rejected', tag: 'status-rejected-tag', text: '已拒绝' },
-                    cancelled: { cls: '', tag: '', text: '已取消' }
+                const sm = {
+                    pending:  { cls:'', tag:'st-pending',   text:'待确认' },
+                    confirmed:{ cls:'status-confirmed', tag:'st-confirmed', text:'已确认' },
+                    rejected: { cls:'status-rejected', tag:'st-rejected',  text:'已拒绝' },
+                    cancelled:{ cls:'status-cancelled',tag:'st-cancelled', text:'已取消' }
                 };
-                const s = statusMap[r.status] || statusMap.pending;
+                const s = sm[r.status] || sm.pending;
                 return `
             <div class="record-card ${s.cls}">
-              <div class="record-header">
-                <span class="record-type">${r.bizType}</span>
-                <span class="record-status ${s.tag}">${s.text}</span>
+              <div class="rc-head">
+                <span class="rc-type">${r.bizType}</span>
+                <span class="rc-status ${s.tag}">${s.text}</span>
               </div>
-              <div class="record-detail"><span>${r.oaAccount}</span><span>${r.location}</span></div>
-              <div class="record-detail"><span>${r.date}</span><span>${r.time}</span></div>
-              <div class="record-time">提交于 ${new Date(r.createdAt).toLocaleString('zh-CN')}</div>
-              ${r.status === 'pending' ? `<button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="cancelReservation('${r.id}')">取消预约</button>` : ''}
+              <div class="rc-detail"><span>${r.oaAccount}</span><span>${r.location}</span></div>
+              <div class="rc-detail"><span>${r.date}</span><span>${r.time}</span></div>
+              <div class="rc-time">提交于 ${new Date(r.createdAt).toLocaleString('zh-CN')}</div>
+              ${r.status === 'pending' ? `<div class="rc-action"><button class="btn-sm-action btn-sm-danger" onclick="cancelReservation('${r.id}')">取消预约</button></div>` : ''}
             </div>`;
             }).join('');
         }
@@ -925,25 +1005,10 @@
             }
         }
 
-        // ==================== Toast ====================
-        function showToast(msg, type) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.className = 'toast ' + type + ' show';
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(() => toast.classList.remove('show'), 2000);
-        }
-
-        // ==================== 弹窗关闭 ====================
-        document.getElementById('pickerModal').addEventListener('click', e => { if (e.target === e.currentTarget)
-                closePicker(); });
-        document.getElementById('dateModal').addEventListener('click', e => { if (e.target === e.currentTarget)
-                closeDatePicker(); });
-        document.getElementById('timeModal').addEventListener('click', e => { if (e.target === e.currentTarget)
-                closeTimePicker(); });
-
-        document.getElementById('oaAccount').addEventListener('keydown', e => { if (e.key === 'Enter') e.target
-                .blur(); });
+        // ==================== 弹窗点击遮罩关闭 ====================
+        document.getElementById('pickerModal').addEventListener('click', e => { if(e.target===e.currentTarget) closePicker(); });
+        document.getElementById('dateModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeDatePicker(); });
+        document.getElementById('timeModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeTimePicker(); });
 
         init();
     </script>
