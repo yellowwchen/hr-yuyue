@@ -29,8 +29,11 @@ insert into public.admins (oa_account) values
   ('narcisszhao')
 on conflict (oa_account) do nothing;
 
--- 3) 让实时（Realtime）监听这张表
-alter publication supabase_realtime add table public.reservations;
+-- 3) 加入实时发布（如已在则跳过，不报错）
+do $$ begin
+  alter publication supabase_realtime add table public.reservations;
+exception when duplicate_object then null;
+end; $$;
 
 -- 4) 开启行级安全（RLS），并删除旧的匿名策略
 alter table public.reservations enable row level security;
