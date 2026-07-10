@@ -33,6 +33,16 @@
             min-height: 100dvh;
         }
 
+        /* ===== 手机框容器 ===== */
+        .app-shell {
+            max-width: 420px;
+            margin: 0 auto;
+            min-height: 100vh;
+            min-height: 100dvh;
+            background: var(--bg);
+            position: relative;
+        }
+
         /* ===== 登录层 ===== */
         .login-view {
             position: fixed;
@@ -399,6 +409,7 @@
     </style>
 </head>
 <body>
+    <div class="app-shell">
 
     <!-- ===== 登录层 ===== -->
     <div class="login-view" id="loginView">
@@ -467,6 +478,8 @@
         </div><!-- /.main-content -->
 
     </div><!-- /#app -->
+
+    </div><!-- /.app-shell -->
 
     <!-- ===== 详情弹窗 ===== -->
     <div class="detail-overlay" id="detailModal">
