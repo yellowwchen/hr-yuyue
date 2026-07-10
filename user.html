@@ -661,9 +661,9 @@
             <h4 style="margin-bottom:12px;">选择预约日期</h4>
             <!-- 日历头部 -->
             <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px;">
-                <button onclick="calMonth(-1)" style="border:none;background:none;font-size:18px;cursor:pointer;color:#666;padding:4px;">&laquo;</button>
+                <button onclick="shiftCalMonth(-1)" style="border:none;background:none;font-size:18px;cursor:pointer;color:#666;padding:4px;">&laquo;</button>
                 <span id="calTitle" style="font-size:15px;font-weight:700;min-width:140px;text-align:center;"></span>
-                <button onclick="calMonth(1)" style="border:none;background:none;font-size:18px;cursor:pointer;color:#666;padding:4px;">&raquo;</button>
+                <button onclick="shiftCalMonth(1)" style="border:none;background:none;font-size:18px;cursor:pointer;color:#666;padding:4px;">&raquo;</button>
             </div>
             <!-- 星期头 -->
             <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;">
@@ -914,7 +914,7 @@
             grid.innerHTML = html;
         }
 
-        function calMonth(delta) {
+        function shiftCalMonth(delta) {
             calMonth += delta;
             if (calMonth > 11) { calMonth = 0; calYear++; }
             if (calMonth < 0) { calMonth = 11; calYear--; }
