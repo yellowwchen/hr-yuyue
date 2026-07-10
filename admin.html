@@ -722,12 +722,6 @@
                 actions.innerHTML = `
                   <button class="btn-action btn-confirm" onclick="confirmReservation('${r.id}')">确认预约</button>
                   <button class="btn-action btn-reject" onclick="showRejectForm()">拒绝预约</button>`;
-            } else if (r.status === 'confirmed') {
-                actions.innerHTML = `
-                  <button class="btn-action btn-reject" onclick="showRejectForm()">拒绝预约</button>`;
-            } else if (r.status === 'rejected') {
-                actions.innerHTML = `
-                  <button class="btn-action btn-confirm" onclick="confirmReservation('${r.id}')">改为确认</button>`;
             } else {
                 actions.innerHTML = '';
             }
