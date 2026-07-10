@@ -33,7 +33,8 @@ const DB = (() => {
       date: r.date,
       time: r.time,
       status: r.status,
-      createdAt: r.created_at
+      createdAt: r.created_at,
+      rejectReason: r.reject_reason
     };
   }
 
@@ -66,10 +67,12 @@ const DB = (() => {
     return mapRow(data);
   }
 
-  async function update(id, status) {
+  async function update(id, status, rejectReason) {
+    const patch = { status };
+    if (rejectReason !== undefined && rejectReason !== null) patch.reject_reason = rejectReason;
     const { data, error } = await client
       .from('reservations')
-      .update({ status })
+      .update(patch)
       .eq('id', id)
       .select()
       .single();
