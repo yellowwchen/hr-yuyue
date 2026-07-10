@@ -2,349 +2,336 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HR 业务预约系统</title>
     <style>
         :root {
-            --primary: #4F6EF7;
-            --bg: #F5F7FA;
+            --primary: #2B7DE9;
+            --primary-light: #EBF2FF;
+            --bg: #F5F8FC;
             --card-bg: #FFFFFF;
-            --text: #2D3436;
-            --text-secondary: #636E72;
-            --text-light: #999;
-            --border: #E8ECF1;
-            --success: #00B894;
-            --danger: #E17055;
-            --shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-            --radius: 14px;
-            --transition: all 0.2s ease;
+            --text: #1A1A2E;
+            --text-secondary: #6B778C;
+            --text-light: #A0ABB8;
+            --border: #E4E9F0;
+            --required: #E74C3C;
+            --success: #27AE60;
+            --danger: #E74C3C;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 10px;
+            --radius-xs: 8px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-            background: #E8ECF1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .phone-frame {
-            width: 390px;
-            height: 844px;
             background: var(--bg);
-            border-radius: 36px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 0 0 3px #1a1a1a, 0 0 0 6px #2d2d2d;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .status-bar {
-            background: #FFFFFF;
-            padding: 14px 28px 8px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            font-weight: 600;
-            color: #1a1a1a;
-            flex-shrink: 0;
-        }
-
-        .notch-bar {
-            display: flex;
-            justify-content: center;
-            padding: 0 0 4px;
-            background: #FFFFFF;
-            flex-shrink: 0;
-        }
-        .notch {
-            width: 100px;
-            height: 28px;
-            background: #1a1a1a;
-            border-radius: 20px;
-        }
-
-        .nav-header {
-            background: #FFFFFF;
-            padding: 12px 20px 14px;
-            text-align: center;
-            font-size: 17px;
-            font-weight: 700;
             color: var(--text);
-            flex-shrink: 0;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .nav-header .badge {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 12px;
-            background: #FFEEEA;
-            color: #D63031;
-        }
-
-        .scroll-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            -webkit-overflow-scrolling: touch;
-        }
-        .scroll-content::-webkit-scrollbar {
-            width: 0;
-        }
-
-        .stat-bar {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 16px;
-        }
-        .stat-item {
-            flex: 1;
-            background: #FFF;
-            padding: 12px 6px;
-            border-radius: var(--radius);
-            text-align: center;
-            box-shadow: var(--shadow);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .stat-item.active {
-            background: #EEF2FF;
-            box-shadow: 0 0 0 2px var(--primary);
-        }
-        .stat-num {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text);
-            display: block;
-        }
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-top: 2px;
-        }
-
-        .record-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow);
-            border-left: 4px solid var(--primary);
-        }
-        .record-card.status-confirmed {
-            border-left-color: var(--success);
-        }
-        .record-card.status-rejected {
-            border-left-color: var(--danger);
-        }
-        .record-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-        }
-        .record-type {
-            font-weight: 700;
-            font-size: 15px;
-            color: var(--text);
-        }
-        .record-status {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 12px;
-        }
-        .status-pending {
-            background: #FFF8E7;
-            color: #C79100;
-        }
-        .status-confirmed {
-            background: #E6FAF3;
-            color: #00875A;
-        }
-        .status-rejected-tag {
-            background: #FFEEEA;
-            color: #D63031;
-        }
-        .record-detail {
-            font-size: 13px;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-        .record-detail span {
-            display: inline-block;
-            margin-right: 14px;
-        }
-        .record-time {
-            font-size: 11px;
-            color: var(--text-light);
-            margin-top: 8px;
-        }
-        .action-row {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid var(--border);
-        }
-
-        .btn {
-            padding: 8px 16px;
-            border-radius: 16px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            font-family: inherit;
-            transition: var(--transition);
-        }
-        .btn-success {
-            background: var(--success);
-            color: #FFF;
-        }
-        .btn-danger {
-            background: var(--danger);
-            color: #FFF;
-        }
-
-        .toast {
-            position: absolute;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2D3436;
-            color: #FFF;
-            padding: 12px 24px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        .toast.show {
-            opacity: 1;
-        }
-        .toast.success {
-            background: var(--success);
-        }
-        .toast.error {
-            background: var(--danger);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 50px 20px;
-            color: var(--text-light);
-            font-size: 14px;
-        }
-
-        @media (max-width: 440px) {
-            .phone-frame {
-                width: 100%;
-                height: 100vh;
-                border-radius: 0;
-                box-shadow: none;
-            }
-            body {
-                padding: 0;
-            }
+            min-height: 100vh;
+            min-height: 100dvh;
         }
 
         /* ===== 登录层 ===== */
         .login-view {
             position: fixed;
             inset: 0;
-            background: linear-gradient(135deg, #4F6EF7 0%, #3A54DB 100%);
+            background: linear-gradient(160deg, #2B7DE9 0%, #1E57A8 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 200;
-            padding: 20px;
+            padding: 24px;
         }
         .login-view.hidden { display: none; }
         .login-card {
             background: #fff;
             width: 100%;
             max-width: 340px;
-            border-radius: 20px;
-            padding: 32px 26px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            border-radius: var(--radius-lg);
+            padding: 36px 28px;
+            box-shadow: 0 24px 64px rgba(0,0,0,.22);
             text-align: center;
         }
-        .login-card h2 { font-size: 20px; color: var(--text); margin: 0 0 6px; }
-        .login-card .sub { font-size: 13px; color: var(--text-secondary); margin: 0 0 22px; }
-        .login-card .form-input { margin-bottom: 14px; text-align: center; }
-        .login-card .btn { margin-top: 6px; }
-        .login-hint {
-            font-size: 12.5px;
-            color: var(--danger);
-            min-height: 18px;
-            margin: 4px 0 10px;
+        .login-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+        .login-card .sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; }
+        .login-input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            outline: none;
+            font-family: inherit;
+            transition: border-color .2s;
+            margin-bottom: 14px;
+            text-align: center;
         }
-        .login-tip { font-size: 11.5px; color: #B0B8C1; margin-top: 14px; line-height: 1.5; }
-        .logged-bar {
-            background: #EEF2FF;
-            color: var(--primary);
-            font-size: 12px;
-            font-weight: 600;
+        .login-input:focus { border-color: var(--primary); }
+        .login-hint { font-size: 12.5px; color: var(--danger); min-height: 18px; margin-bottom: 6px; }
+        .btn-login {
+            width: 100%; padding: 14px; border-radius: var(--radius-sm);
+            background: var(--primary); color: #fff; border: none;
+            font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; margin-top: 4px;
+        }
+        .btn-login:active { opacity: .88; }
+        .login-tip { font-size: 11.5px; color: #B0BCC8; margin-top: 16px; line-height: 1.6; }
+
+        /* ===== 主应用容器 ===== */
+        #app {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        /* ===== 顶部导航栏（标题+badge） ===== */
+        .top-header {
+            background: #fff;
+            padding: 17px 20px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 16px;
             flex-shrink: 0;
         }
-        .logged-bar .logout { color: var(--danger); cursor: pointer; font-weight: 600; }
+        .top-header h1 {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .admin-badge {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 4px 12px;
+            border-radius: 12px;
+        }
+
+        /* ===== 已登录状态条 ===== */
+        .logged-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 20px;
+            background: var(--primary-light);
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+        .logged-bar .logout-btn {
+            color: var(--danger); font-weight: 600; cursor: pointer;
+            padding: 2px 8px; border-radius: 4px;
+        }
+
+        /* ===== 胶囊 Tab 切换 ===== */
+        .tab-switch {
+            display: flex;
+            gap: 0;
+            padding: 12px 20px 0;
+            flex-shrink: 0;
+        }
+        .tab-pill {
+            flex: 1;
+            text-align: center;
+            padding: 11px 0;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+            color: var(--text-secondary);
+            background: transparent;
+            transition: color .2s;
+        }
+        .tab-pill.active {
+            color: var(--primary);
+            background: #fff;
+            box-shadow: 0 -2px 10px rgba(43,125,233,.08);
+        }
+
+        /* ===== 内容区 ===== */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 20px 30px;
+            background: var(--bg);
+        }
+        .main-content::-webkit-scrollbar { display: none; }
+
+        /* ===== 统计卡片 ===== */
+        .stat-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .stat-item {
+            flex: 1;
+            background: #fff;
+            padding: 14px 8px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,.03);
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .stat-item.active {
+            background: var(--primary-light);
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+        .stat-num {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text);
+            display: block;
+        }
+        .stat-label {
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            margin-top: 3px;
+        }
+
+        /* ===== 记录卡片 ===== */
+        .record-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 18px 18px 16px;
+            margin-bottom: 12px;
+            margin-top: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.03);
+            border-left: 4px solid var(--primary);
+        }
+        .record-card.status-confirmed { border-left-color: var(--success); }
+        .record-card.status-rejected { border-left-color: var(--danger); }
+        .rc-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .rc-type { font-weight: 700; font-size: 15px; }
+        .rc-status {
+            font-size: 11.5px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 10px;
+        }
+        .st-pending { background: #FFF9ED; color: #D4940A; }
+        .st-confirmed { background: #EDFBF4; color: #1D8A52; }
+        .st-rejected { background: #FEECEC; color: #D63C31; }
+        .st-cancelled { background: #F5F5F5; color: #999; }
+        .rc-detail {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        .rc-detail span { display: inline-block; margin-right: 14px; }
+        .rc-time {
+            font-size: 11.5px;
+            color: var(--text-light);
+            margin-top: 8px;
+        }
+        .rc-action {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+        .btn-action {
+            flex: 1;
+            padding: 9px 0;
+            border-radius: var(--radius-xs);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            transition: opacity .15s;
+        }
+        .btn-action:active { opacity: .78; }
+        .btn-confirm { background: var(--success); color: #fff; }
+        .btn-reject { background: var(--danger); color: #fff; }
+
+        /* ===== 空状态 ===== */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-light);
+            font-size: 14.5px;
+        }
+
+        /* ===== Toast ===== */
+        .toast {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            background: rgba(26,26,46,.88);
+            color: #fff;
+            padding: 11px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 400;
+            opacity: 0;
+            pointer-events: none;
+            transition: all .25s ease;
+            white-space: nowrap;
+            backdrop-filter: blur(8px);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: rgba(39,174,96,.92); }
+        .toast.error { background: rgba(231,76,60,.92); }
     </style>
 </head>
 <body>
 
-    <!-- 登录层（未登录时显示） -->
+    <!-- ===== 登录层 ===== -->
     <div class="login-view" id="loginView">
         <div class="login-card">
             <h2>HR 业务预约系统</h2>
             <p class="sub">HR 管理员请用 OA 账号登录</p>
-            <input type="text" class="form-input" id="loginOA" placeholder="OA账号" maxlength="40" autocomplete="username">
-            <input type="password" class="form-input" id="loginPwd" placeholder="密码（至少6位）" autocomplete="current-password">
+            <input type="text" class="login-input" id="loginOA" placeholder="OA账号" maxlength="40" autocomplete="username">
+            <input type="password" class="login-input" id="loginPwd" placeholder="密码（至少6位）" autocomplete="current-password">
             <div class="login-hint" id="loginHint"></div>
-            <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">登录 / 注册</button>
+            <button class="btn-login" id="loginBtn" onclick="handleLogin()">登录 / 注册</button>
             <p class="login-tip">仅管理员 OA 账号可查看全部预约记录；<br>首次使用将自动创建账号。</p>
         </div>
     </div>
 
-    <div class="phone-frame" id="app" style="display:none;">
-        <div class="status-bar">
-            <span>9:41</span>
-            <span>5G ▮▮▮▮ 🔋</span>
-        </div>
-        <div class="notch-bar"><div class="notch"></div></div>
-        <div class="nav-header">
-            <span>HR 业务预约系统</span>
-            <span class="badge">管理端</span>
-        </div>
-        <div class="logged-bar">
-            <span id="loggedOA">已登录</span>
-            <span class="logout" onclick="handleLogout()">退出</span>
+    <!-- ===== 主应用 ===== -->
+    <div id="app">
+
+        <!-- 顶部导航 -->
+        <div class="top-header">
+            <h1>预约管理</h1>
+            <span class="admin-badge">管理端</span>
         </div>
 
+        <!-- 已登录状态条 -->
+        <div class="logged-bar" id="loggedBar" style="display:none;">
+            <span id="loggedOA">已登录</span>
+            <span class="logout-btn" onclick="handleLogout()">退出</span>
+        </div>
+
+        <!-- Tab 切换 -->
+        <div class="tab-switch" id="tabSwitch" style="display:none;">
+            <div class="tab-pill active" data-tab="pending" onclick="switchTab('pending')">未处理</div>
+            <div class="tab-pill" data-tab="processed" onclick="switchTab('processed')">已处理</div>
+        </div>
+
+        <!-- Toast -->
         <div class="toast" id="toast"></div>
 
-        <div class="scroll-content">
-            <div class="stat-bar" id="statBar">
+        <!-- 内容区 -->
+        <div class="main-content">
+
+            <!-- 统计 -->
+            <div class="stat-bar" id="statBar" style="display:none;">
                 <div class="stat-item active" data-filter="all" onclick="setFilter('all', this)">
                     <span class="stat-num" id="statAll">0</span>
                     <span class="stat-label">全部</span>
@@ -363,25 +350,38 @@
                 </div>
             </div>
 
+            <!-- 记录列表 -->
             <div id="recordsList"></div>
-            <div class="empty-state" id="emptyState">暂无预约申请</div>
-        </div>
-    </div>
+            <div class="empty-state" id="emptyState">暂无记录</div>
+
+        </div><!-- /.main-content -->
+
+    </div><!-- /#app -->
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="db.js"></script>
     <script>
-        // ==================== 数据来源：云端 Supabase（与用户端实时共享） ====================
+        // ==================== 数据 ====================
         let reservations = [];
         let filter = 'all';
+        let currentTab = 'pending';
 
-        // ==================== 登录 / 鉴权 ====================
+        // ==================== 工具 ====================
         function oaFromEmail(email) {
             if (!email) return '';
             return email.split('@')[0];
         }
 
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast' + (type ? ' ' + type : '') + ' show';
+            clearTimeout(toast._t);
+            toast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+
+        // ==================== 登录 ====================
         function showLogin() {
             document.getElementById('loginView').classList.remove('hidden');
             document.getElementById('app').style.display = 'none';
@@ -391,8 +391,11 @@
             const oa = oaFromEmail(session && session.user && session.user.email);
             document.getElementById('loginView').classList.add('hidden');
             document.getElementById('app').style.display = 'flex';
+            document.getElementById('loggedBar').style.display = 'flex';
+            document.getElementById('tabSwitch').style.display = 'flex';
+            document.getElementById('statBar').style.display = 'flex';
             document.getElementById('loggedOA').textContent = '已登录：' + oa;
-            // RLS 自动只返回该管理员可见的记录（管理员看全部）
+
             loadReservations().then(() => { updateStats(); renderRecords(); });
             DB.subscribe(() => {
                 loadReservations().then(() => { updateStats(); renderRecords(); });
@@ -418,10 +421,10 @@
             } catch (e) {
                 try {
                     const r2 = await DB.signUp(oa, pwd);
-                    session = r2.session || (r2.data && r2.data.session);
+                    session = r2.session || (r2.data && r2.session);
                     if (!session) {
                         btn.textContent = '登录 / 注册';
-                        showLoginHint('账号已创建，但需验证邮箱才能登录。请到 Supabase 关闭“邮箱验证”后重试。');
+                        showLoginHint('账号已创建，但需验证邮箱才能登录。请到 Supabase 关闭"邮箱验证"后重试。');
                         return;
                     }
                 } catch (e2) {
@@ -449,10 +452,6 @@
             }
         }
 
-        function saveReservations() {
-            // 数据由云端持久化，前端不再写入本地
-        }
-
         async function init() {
             try {
                 await DB.init();
@@ -461,33 +460,47 @@
                 return;
             }
             const session = await DB.getSession();
-            if (session) {
-                enterApp(session);
-            } else {
-                showLogin();
-            }
+            if (session) enterApp(session);
+            else showLogin();
             DB.onAuthChange((s) => { if (!s) showLogin(); });
         }
 
+        // ==================== Tab 切换（未处理 / 已处理）====================
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-pill').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.tab-pill[data-tab="${tab}"]`).classList.add('active');
+
+            // 切 tab 时自动切换过滤
+            if (tab === 'pending') setFilter('pending', null, true);
+            else setFilter('confirmed', null, true);
+
+            document.querySelector('.main-content').scrollTop = 0;
+        }
+
+        // ==================== 统计与过滤 ====================
         function updateStats() {
             document.getElementById('statAll').textContent = reservations.length;
             document.getElementById('statPending').textContent = reservations.filter(r => r.status === 'pending').length;
-            document.getElementById('statConfirmed').textContent = reservations.filter(r => r.status === 'confirmed')
-                .length;
+            document.getElementById('statConfirmed').textContent = reservations.filter(r => r.status === 'confirmed').length;
             document.getElementById('statRejected').textContent = reservations.filter(r => r.status === 'rejected').length;
         }
 
-        function setFilter(f, el) {
+        function setFilter(f, el, skipPillUpdate) {
             filter = f;
-            document.querySelectorAll('#statBar .stat-item').forEach(e => e.classList.remove('active'));
-            el.classList.add('active');
+            if (el) {
+                document.querySelectorAll('#statBar .stat-item').forEach(e => e.classList.remove('active'));
+                el.classList.add('active');
+            }
             renderRecords();
         }
 
+        // ==================== 渲染记录 ====================
         function renderRecords() {
             const container = document.getElementById('recordsList');
             const emptyState = document.getElementById('emptyState');
             let filtered = reservations;
+
             if (filter === 'pending') filtered = reservations.filter(r => r.status === 'pending');
             else if (filter === 'confirmed') filtered = reservations.filter(r => r.status === 'confirmed');
             else if (filter === 'rejected') filtered = reservations.filter(r => r.status === 'rejected');
@@ -500,35 +513,35 @@
             emptyState.style.display = 'none';
 
             container.innerHTML = filtered.map(r => {
-                const statusMap = {
-                    pending: { cls: '', tag: 'status-pending', text: '待处理' },
-                    confirmed: { cls: 'status-confirmed', tag: 'status-confirmed', text: '已确认' },
-                    rejected: { cls: 'status-rejected', tag: 'status-rejected-tag', text: '已拒绝' },
-                    cancelled: { cls: '', tag: '', text: '已取消' }
+                const sm = {
+                    pending:   { cls:'', tag:'st-pending',   text:'待处理' },
+                    confirmed: { cls:'status-confirmed', tag:'st-confirmed', text:'已确认' },
+                    rejected:  { cls:'status-rejected', tag:'st-rejected',  text:'已拒绝' },
+                    cancelled: { cls:'', tag:'st-cancelled', text:'已取消' }
                 };
-                const s = statusMap[r.status] || statusMap.pending;
+                const s = sm[r.status] || sm.pending;
                 return `
             <div class="record-card ${s.cls}">
-              <div class="record-header">
-                <span class="record-type">${r.bizType}</span>
-                <span class="record-status ${s.tag}">${s.text}</span>
+              <div class="rc-head">
+                <span class="rc-type">${r.bizType}</span>
+                <span class="rc-status ${s.tag}">${s.text}</span>
               </div>
-              <div class="record-detail"><span>申请人：${r.oaAccount}</span></div>
-              <div class="record-detail"><span>地点：${r.location}</span></div>
-              <div class="record-detail"><span>时间：${r.date} ${r.time}</span></div>
-              <div class="record-time">提交于 ${new Date(r.createdAt).toLocaleString('zh-CN')}</div>
+              <div class="rc-detail"><span>申请人：${r.oaAccount}</span></div>
+              <div class="rc-detail"><span>地点：${r.location}</span></div>
+              <div class="rc-detail"><span>时间：${r.date} ${r.time}</span></div>
+              <div class="rc-time">提交于 ${new Date(r.createdAt).toLocaleString('zh-CN')}</div>
               ${r.status === 'pending' ? `
-              <div class="action-row">
-                <button class="btn btn-success" onclick="confirmReservation('${r.id}')">确认预约</button>
-                <button class="btn btn-danger" onclick="rejectReservation('${r.id}')">拒绝预约</button>
+              <div class="rc-action">
+                <button class="btn-action btn-confirm" onclick="confirmReservation('${r.id}')">确认预约</button>
+                <button class="btn-action btn-reject" onclick="rejectReservation('${r.id}')">拒绝预约</button>
               </div>` : ''}
               ${r.status === 'confirmed' ? `
-              <div class="action-row">
-                <button class="btn btn-danger" onclick="rejectReservation('${r.id}')">改为拒绝</button>
+              <div class="rc-action">
+                <button class="btn-action btn-reject" style="flex:.6;" onclick="rejectReservation('${r.id}')">改为拒绝</button>
               </div>` : ''}
               ${r.status === 'rejected' ? `
-              <div class="action-row">
-                <button class="btn btn-success" onclick="confirmReservation('${r.id}')">改为确认</button>
+              <div class="rc-action">
+                <button class="btn-action btn-confirm" style="flex:.6;" onclick="confirmReservation('${r.id}')">改为确认</button>
               </div>` : ''}
             </div>`;
             }).join('');
@@ -552,14 +565,6 @@
             } catch (e) {
                 showToast('操作失败：' + (e.message || e), 'error');
             }
-        }
-
-        function showToast(msg, type) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.className = 'toast ' + type + ' show';
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
         init();
