@@ -47,9 +47,12 @@ const DB = (() => {
   }
 
   async function create(r) {
+    const { data: ud, error: ue } = await client.auth.getUser();
+    const uid = ud && ud.user ? ud.user.id : null;
     const { data, error } = await client
       .from('reservations')
       .insert([{
+        user_id: uid,
         oa_account: r.oaAccount,
         biz_type: r.bizType,
         location: r.location,
@@ -74,6 +77,44 @@ const DB = (() => {
     return mapRow(data);
   }
 
+  // ---------- 登录 / 鉴权 ----------
+  // OA 账号映射为内部邮箱（不发送真实邮件），格式：oa@oa.local
+  function authEmail(oa) { return oa.trim().toLowerCase() + '@oa.local'; }
+
+  async function getSession() {
+    const { data } = await client.auth.getSession();
+    return data.session;
+  }
+
+  function onAuthChange(cb) {
+    if (!client) return;
+    client.auth.onAuthStateChange((_event, session) => cb(session));
+  }
+
+  // 登录（已注册账号）
+  async function signIn(oa, password) {
+    const { data, error } = await client.auth.signInWithPassword({ email: authEmail(oa), password });
+    if (error) throw error;
+    return data;
+  }
+
+  // 注册（首次使用，自动开户）
+  async function signUp(oa, password) {
+    const { data, error } = await client.auth.signUp({ email: authEmail(oa), password });
+    if (error) throw error;
+    return data;
+  }
+
+  async function signOut() {
+    await client.auth.signOut();
+  }
+
+  // 当前登录用户的 OA 账号（从邮箱本地部分取）
+  function currentOA() {
+    const u = client.auth.getUser ? null : null;
+    return null; // 由调用方从 session 解析
+  }
+
   // 订阅整张表的增删改，任一端变化即触发回调（真正的实时推送）
   function subscribe(cb) {
     if (!client) return;
@@ -83,5 +124,5 @@ const DB = (() => {
       .subscribe();
   }
 
-  return { init, list, create, update, subscribe, isConfigured };
+  return { init, list, create, update, subscribe, isConfigured, getSession, onAuthChange, signIn, signUp, signOut, authEmail };
 })();
