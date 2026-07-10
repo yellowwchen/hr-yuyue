@@ -256,6 +256,116 @@
         .btn-confirm { background: var(--success); color: #fff; }
         .btn-reject { background: var(--danger); color: #fff; }
 
+        /* ===== 记录卡片可点（查看详情） ===== */
+        .record-card { cursor: pointer; transition: box-shadow .2s, transform .1s; }
+        .record-card:active { transform: scale(.99); }
+        .rc-more {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        .rc-more .arrow { color: #C2CCDA; font-weight: 700; }
+
+        /* ===== 详情弹窗 ===== */
+        .detail-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: 300;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s ease;
+        }
+        .detail-overlay.show { opacity: 1; pointer-events: auto; }
+        .detail-sheet {
+            background: #fff;
+            border-radius: 20px 20px 0 0;
+            padding: 24px 22px 30px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 88vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform .3s cubic-bezier(.32,.72,0,1);
+        }
+        .detail-overlay.show .detail-sheet { transform: translateY(0); }
+        .detail-title {
+            text-align: center;
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .detail-title .back {
+            position: absolute;
+            left: 22px;
+            font-size: 15px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 13px 2px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        .detail-row .k { color: var(--text-secondary); flex-shrink: 0; margin-right: 16px; }
+        .detail-row .v { color: var(--text); font-weight: 600; text-align: right; }
+        .detail-reason-box {
+            margin-top: 14px;
+            background: #FEF5F6;
+            border: 1px solid #FDD8DC;
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            font-size: 13.5px;
+            color: #C0392B;
+            line-height: 1.6;
+        }
+        .detail-reason-box .rh { font-weight: 700; margin-bottom: 4px; display: block; }
+        .detail-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 22px;
+        }
+        .detail-actions .btn-action { flex: 1; padding: 13px 0; font-size: 15px; border-radius: 25px; }
+
+        /* ===== 拒绝原因输入 ===== */
+        .reason-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 18px 0 10px;
+            color: var(--text);
+        }
+        .reason-input {
+            width: 100%;
+            min-height: 96px;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            resize: none;
+            color: var(--text);
+        }
+        .reason-input:focus { border-color: var(--danger); }
+        .reason-hint { font-size: 12px; color: var(--danger); min-height: 16px; margin-top: 6px; }
+
         /* ===== 空状态 ===== */
         .empty-state {
             text-align: center;
@@ -357,6 +467,27 @@
         </div><!-- /.main-content -->
 
     </div><!-- /#app -->
+
+    <!-- ===== 详情弹窗 ===== -->
+    <div class="detail-overlay" id="detailModal">
+        <div class="detail-sheet">
+            <div class="detail-title">
+                <span class="back" onclick="closeDetail()">‹ 返回</span>
+                预约详情
+            </div>
+            <div id="detailContent"></div>
+
+            <!-- 拒绝原因输入区（点拒绝时显示） -->
+            <div id="reasonWrap" style="display:none;">
+                <div class="reason-label">请填写拒绝原因</div>
+                <textarea class="reason-input" id="reasonInput" placeholder="例如：当天名额已满，请改约其他时间"></textarea>
+                <div class="reason-hint" id="reasonHint"></div>
+            </div>
+
+            <!-- 操作按钮区 -->
+            <div class="detail-actions" id="detailActions"></div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
@@ -520,37 +651,112 @@
                     cancelled: { cls:'', tag:'st-cancelled', text:'已取消' }
                 };
                 const s = sm[r.status] || sm.pending;
+                const actionText = r.status === 'pending' ? '去处理' : '查看详情';
                 return `
-            <div class="record-card ${s.cls}">
+            <div class="record-card ${s.cls}" onclick="openDetail('${r.id}')">
               <div class="rc-head">
                 <span class="rc-type">${r.bizType}</span>
                 <span class="rc-status ${s.tag}">${s.text}</span>
               </div>
               <div class="rc-detail"><span>申请人：${r.oaAccount}</span></div>
-              <div class="rc-detail"><span>地点：${r.location}</span></div>
               <div class="rc-detail"><span>时间：${r.date} ${r.time}</span></div>
-              <div class="rc-time">提交于 ${new Date(r.createdAt).toLocaleString('zh-CN')}</div>
-              ${r.status === 'pending' ? `
-              <div class="rc-action">
-                <button class="btn-action btn-confirm" onclick="confirmReservation('${r.id}')">确认预约</button>
-                <button class="btn-action btn-reject" onclick="rejectReservation('${r.id}')">拒绝预约</button>
-              </div>` : ''}
-              ${r.status === 'confirmed' ? `
-              <div class="rc-action">
-                <button class="btn-action btn-reject" style="flex:.6;" onclick="rejectReservation('${r.id}')">改为拒绝</button>
-              </div>` : ''}
-              ${r.status === 'rejected' ? `
-              <div class="rc-action">
-                <button class="btn-action btn-confirm" style="flex:.6;" onclick="confirmReservation('${r.id}')">改为确认</button>
-              </div>` : ''}
+              <div class="rc-more">
+                <span>${actionText}</span>
+                <span class="arrow">›</span>
+              </div>
             </div>`;
             }).join('');
+        }
+
+        // ==================== 详情弹窗 ====================
+        let currentDetailId = null;
+        let detailRejectMode = false;
+
+        function openDetail(id) {
+            const r = reservations.find(x => x.id === id);
+            if (!r) return;
+            currentDetailId = id;
+            detailRejectMode = false;
+            document.getElementById('reasonWrap').style.display = 'none';
+            document.getElementById('reasonInput').value = '';
+            document.getElementById('reasonHint').textContent = '';
+            renderDetail(r);
+            document.getElementById('detailModal').classList.add('show');
+        }
+
+        function renderDetail(r) {
+            const sm = {
+                pending:   { tag:'st-pending',   text:'待处理' },
+                confirmed: { tag:'st-confirmed', text:'已确认' },
+                rejected:  { cls:'status-rejected', tag:'st-rejected',  text:'已拒绝' },
+                cancelled: { tag:'st-cancelled', text:'已取消' }
+            };
+            const s = sm[r.status] || sm.pending;
+            const detail = document.getElementById('detailContent');
+            detail.innerHTML = `
+              <div class="detail-row"><span class="k">业务类型</span><span class="v">${r.bizType}</span></div>
+              <div class="detail-row"><span class="k">申请人</span><span class="v">${r.oaAccount}</span></div>
+              <div class="detail-row"><span class="k">预约地点</span><span class="v">${r.location}</span></div>
+              <div class="detail-row"><span class="k">预约日期</span><span class="v">${r.date}</span></div>
+              <div class="detail-row"><span class="k">预约时间</span><span class="v">${r.time}</span></div>
+              <div class="detail-row"><span class="k">当前状态</span><span class="v"><span class="rc-status ${s.tag}">${s.text}</span></span></div>
+              <div class="detail-row"><span class="k">提交时间</span><span class="v">${new Date(r.createdAt).toLocaleString('zh-CN')}</span></div>
+              ${r.status === 'rejected' && r.rejectReason ? `<div class="detail-reason-box"><span class="rh">拒绝原因</span>${r.rejectReason}</div>` : ''}
+            `;
+
+            const actions = document.getElementById('detailActions');
+            if (r.status === 'pending') {
+                actions.innerHTML = `
+                  <button class="btn-action btn-confirm" onclick="confirmReservation('${r.id}')">确认预约</button>
+                  <button class="btn-action btn-reject" onclick="showRejectForm()">拒绝预约</button>`;
+            } else if (r.status === 'confirmed') {
+                actions.innerHTML = `
+                  <button class="btn-action btn-reject" onclick="showRejectForm()">拒绝预约</button>`;
+            } else if (r.status === 'rejected') {
+                actions.innerHTML = `
+                  <button class="btn-action btn-confirm" onclick="confirmReservation('${r.id}')">改为确认</button>`;
+            } else {
+                actions.innerHTML = '';
+            }
+        }
+
+        function closeDetail() {
+            document.getElementById('detailModal').classList.remove('show');
+            detailRejectMode = false;
+        }
+
+        function showRejectForm() {
+            detailRejectMode = true;
+            document.getElementById('reasonWrap').style.display = 'block';
+            // 非 pending 时把确认按钮隐藏，只留提交拒绝
+            const actions = document.getElementById('detailActions');
+            actions.innerHTML = `<button class="btn-action btn-reject" onclick="submitReject()">提交拒绝</button>`;
+            document.getElementById('reasonInput').focus();
+        }
+
+        async function submitReject() {
+            const reason = document.getElementById('reasonInput').value.trim();
+            if (!reason) {
+                document.getElementById('reasonHint').textContent = '请填写拒绝原因';
+                return;
+            }
+            if (!currentDetailId) return;
+            try {
+                await DB.update(currentDetailId, 'rejected', reason);
+                showToast('预约已拒绝', 'error');
+                detailRejectMode = false;
+                closeDetail();
+                loadReservations().then(() => { updateStats(); renderRecords(); });
+            } catch (e) {
+                showToast('操作失败：' + (e.message || e), 'error');
+            }
         }
 
         async function confirmReservation(id) {
             try {
                 await DB.update(id, 'confirmed');
                 showToast('预约已确认', 'success');
+                closeDetail();
                 loadReservations().then(() => { updateStats(); renderRecords(); });
             } catch (e) {
                 showToast('操作失败：' + (e.message || e), 'error');
@@ -558,14 +764,18 @@
         }
 
         async function rejectReservation(id) {
+            if (detailRejectMode) { submitReject(); return; }
             try {
                 await DB.update(id, 'rejected');
                 showToast('预约已拒绝', 'error');
+                closeDetail();
                 loadReservations().then(() => { updateStats(); renderRecords(); });
             } catch (e) {
                 showToast('操作失败：' + (e.message || e), 'error');
             }
         }
+
+        document.getElementById('detailModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeDetail(); });
 
         init();
     </script>
